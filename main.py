@@ -73,9 +73,16 @@ async def create_item(item: ItemCreate, db: Session = Depends(get_db)):
     db.refresh(db_item)
     return db_item
 
-@app.put("/item/{item_id}")
-def update_item(item_id: int, item: ItemBase):
-    return {"id": item_id, "request_body": item}
+@app.put("/item/{item_id}", response_model=ItemResponse)
+async def update_item(item_id: int, item: ItemCreate, db: Session = Depends(get_db)):
+    db_item = db.query(ItemDB).filter(ItemDB.id == item_id).first()
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    for key, value in item.model_dump().items():
+        setattr(db_item, key, value)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
 
 @app.delete("/item/{item_id}")
 def delete(item_id: int):
