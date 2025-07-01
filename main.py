@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from typing import Union, List, Optional
 from pydantic import BaseModel
 
@@ -58,9 +58,12 @@ async def root():
 async def read_all_items(db: Session = Depends(get_db)):
     return db.query(ItemDB).all()
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+@app.get("/items/{item_id}", response_model=ItemResponse)
+async def read_item(item_id: int, db: Session = Depends(get_db)):
+    db_item = db.query(ItemDB).filter(ItemDB.id == item_id).first()
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return db_item
 
 @app.post("/items", response_model=ItemResponse)
 async def create_item(item: ItemCreate, db: Session = Depends(get_db)):
