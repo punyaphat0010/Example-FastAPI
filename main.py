@@ -54,6 +54,10 @@ def get_db():
 async def root():
     return {"message": "Hello World"}
 
+@app.get("/items/", response_model=List[ItemResponse])
+async def read_all_items(db: Session = Depends(get_db)):
+    return db.query(ItemDB).all()
+
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
