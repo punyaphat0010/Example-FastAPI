@@ -22,3 +22,7 @@ def read_item(item_id: int, q: Union[str, None] = None):
 @app.post("/items")
 def create_item(item: Item):
     return { "request_body": item }
+
+@app.put("/item/{item_id}")
+def update_item(item_id: int, item: Item):
+    return {"id": item_id, "request_body": item}
