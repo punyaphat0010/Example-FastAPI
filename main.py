@@ -26,3 +26,7 @@ def create_item(item: Item):
 @app.put("/item/{item_id}")
 def update_item(item_id: int, item: Item):
     return {"id": item_id, "request_body": item}
+
+@app.delete("/item/{item_id}")
+def delete(item_id: int):
+    return {"message": f"Item {item_id} delete"}
